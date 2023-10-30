@@ -28,13 +28,14 @@
 
 #### 核心流程说明
 ##### 1. 定义id生成器结构体
-    ```
+```
    type IdSequence struct {
       idListLength int64           // 号段长度，可根据业务qps自行设置
       biz          string          // 业务类型
       ids          chan int64      // 生成的id list, chan通道
       stopMonitor  chan bool       // 停止标志channel类型
    }
+```
 
 ##### 2. id生成器共有Monitor，GetOne, Close三个对外暴露的方法。
        Monitor方法主要实现对id list的监控，当检测到id list为空时，会调用add方法，向id list中添加idListLength个新id，在添加新id过程中，

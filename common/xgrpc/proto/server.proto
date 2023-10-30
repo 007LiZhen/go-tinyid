@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "../proto";
+
+service IdSequenceService {
+  rpc Get(SendRequest) returns (SendResponse) {}
+}
+
+message SendRequest {
+  string biz = 1;
+}
+
+message SendResponse {
+  int64 id = 1;
+}

@@ -42,11 +42,12 @@ func TestNewIdSequence(t *testing.T) {
 			got.stopMonitor <- true
 			assert.Equal(t, int64(len(got.ids)), tt.args.idListLength)
 
-			id := got.GetOne()
+			id, err := got.GetOne()
+			assert.Equal(t, err, nil)
 			fmt.Println("id is: ", id)
 
 			got.Close()
-			got.SaveLastId(context.Background())
+			got.saveLastId(context.Background())
 		})
 	}
 }

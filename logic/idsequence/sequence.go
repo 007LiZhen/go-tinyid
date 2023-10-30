@@ -17,18 +17,11 @@ type IdSequence struct {
 	stopMonitor  chan bool
 }
 
-var IdSequenceMap = make(map[string]*IdSequence)
-
-func Init() {
-	IdSequenceMap = map[string]*IdSequence{
-		"demo": NewIdSequence(10000, "demo"),
-	}
-}
-
 func Stop() {
 	for _, idSequence := range IdSequenceMap {
+		idSequence.stopMonitor <- true
 		idSequence.Close()
-		idSequence.SaveLastId(context.Background())
+		idSequence.saveLastId(context.Background())
 	}
 }
 
@@ -66,7 +59,7 @@ func (is *IdSequence) Monitor(ctx context.Context) {
 			return
 		default:
 			if len(is.ids) == 0 {
-				if err := is.Add(ctx); err != nil {
+				if err := is.add(ctx); err != nil {
 					fmt.Println("monitor id sequence err: ", err)
 				} else {
 					fmt.Println("add ids success...")
@@ -76,11 +69,23 @@ func (is *IdSequence) Monitor(ctx context.Context) {
 	}
 }
 
-func (is *IdSequence) GetOne() int64 {
-	return <-is.ids
+func (is *IdSequence) GetOne() (int64, error) {
+	// 如果取不到，则会等待1s
+	ticker := time.After(time.Second)
+
+	for {
+		select {
+		case id, ok := <-is.ids:
+			if ok && id != 0 {
+				return id, nil
+			}
+		case <-ticker:
+			return 0, fmt.Errorf("get next id timeout")
+		}
+	}
 }
 
-func (is *IdSequence) Add(ctx context.Context) error {
+func (is *IdSequence) add(ctx context.Context) error {
 	minId, maxId, err := is.getNewIdListLoop(ctx)
 	if err != nil {
 		return err
@@ -109,7 +114,6 @@ func (is *IdSequence) getNewIdListLoop(ctx context.Context) (int64, int64, error
 			if err == nil {
 				return <-curMaxIdCh, <-newMaxIdCh, nil
 			}
-			fmt.Println("err is: ", err)
 		default:
 			is.getNewIdListSync(ctx, curMaxIdCh, newMaxIdCh, errCh)
 			time.Sleep(time.Millisecond)
@@ -128,7 +132,6 @@ func (is *IdSequence) getNewIdListSync(ctx context.Context, curMaxIdCh, newMaxId
 		return
 	}
 
-	// 新接入业务，初始化
 	if len(records) == 0 {
 		if err := idSequenceDao.SetModel(model.NewIdSequence().SetBiz(is.biz).SetValue(0).SetValue(0)).
 			InsertOneRecord(ctx); err != nil {
@@ -160,7 +163,7 @@ func (is *IdSequence) getNewIdListSync(ctx context.Context, curMaxIdCh, newMaxId
 	}
 
 	if rowsEffect != 1 {
-		errCh <- errors.New("data has been changed")
+		errCh <- errors.New("data has been changed, need to retry")
 		return
 	}
 
@@ -169,7 +172,7 @@ func (is *IdSequence) getNewIdListSync(ctx context.Context, curMaxIdCh, newMaxId
 	errCh <- nil
 }
 
-func (is *IdSequence) SaveLastId(ctx context.Context) {
+func (is *IdSequence) saveLastId(ctx context.Context) {
 	lastId, ok := <-is.ids
 	if ok && lastId != 0 {
 		dao.NewIdSequenceDao().UpdateByCond(ctx, 0, map[string]interface{}{

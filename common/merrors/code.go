@@ -5,4 +5,5 @@ const (
 
 	ErnoRequestBindFailed = 1001 + iota
 	ErnoDataNotSupport
+	ErnoGetNextIdFailed
 )

@@ -33,6 +33,12 @@ func (id *ID) Get(ctx *gin.Context) {
 		return
 	}
 
-	resp.WithData(idSequence.GetOne())
+	nextId, err := idSequence.GetOne()
+	if err != nil {
+		resp.WithMsg(merrors.ErnoGetNextIdFailed, err.Error())
+		return
+	}
+
+	resp.WithData(nextId)
 	return
 }

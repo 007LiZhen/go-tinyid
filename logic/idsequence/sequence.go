@@ -17,16 +17,9 @@ type IdSequence struct {
 	stopMonitor  chan bool
 }
 
-var IdSequenceMap = make(map[string]*IdSequence)
-
-func Init() {
-	IdSequenceMap = map[string]*IdSequence{
-		"demo": NewIdSequence(10000, "demo"),
-	}
-}
-
 func Stop() {
 	for _, idSequence := range IdSequenceMap {
+		idSequence.stopMonitor <- true
 		idSequence.Close()
 		idSequence.SaveLastId(context.Background())
 	}

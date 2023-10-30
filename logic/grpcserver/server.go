@@ -16,6 +16,6 @@ func (is *IdSequenceServer) Get(ctx context.Context, req *proto.SendRequest) (
 	}
 
 	resp = new(proto.SendResponse)
-	resp.Id = idSequence.GetOne()
-	return resp, nil
+	resp.Id, err = idSequence.GetOne()
+	return resp, err
 }

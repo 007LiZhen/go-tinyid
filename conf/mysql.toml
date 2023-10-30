@@ -1,0 +1,5 @@
+[mysql]
+dsn = "root:123456@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=True&loc=UTC&timeout=10s&readTimeout=5s&writeTimeout=5s"
+max_life_time = 60
+max_open_conns = 10
+max_idle_conns = 10

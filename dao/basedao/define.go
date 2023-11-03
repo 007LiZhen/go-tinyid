@@ -3,7 +3,7 @@ package basedao
 import (
 	"gorm.io/gorm"
 
-	"gitee.com/git-lz/go-tinyid/common/mysql"
+	"github.com/007LiZhen/go-tinyid/common/mysql"
 )
 
 type BaseDao struct {

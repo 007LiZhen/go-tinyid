@@ -3,8 +3,8 @@ package grpcserver
 import (
 	"context"
 
-	"gitee.com/git-lz/go-tinyid/common/xgrpc/proto"
-	"gitee.com/git-lz/go-tinyid/logic/idsequence"
+	"github.com/007LiZhen/go-tinyid/common/xgrpc/proto"
+	"github.com/007LiZhen/go-tinyid/logic/idsequence"
 )
 
 func (is *IdSequenceServer) Get(ctx context.Context, req *proto.SendRequest) (

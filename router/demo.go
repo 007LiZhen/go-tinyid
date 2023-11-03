@@ -6,7 +6,7 @@ import (
 	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
 
-	"gitee.com/git-lz/go-tinyid/controller"
+	"github.com/007LiZhen/go-tinyid/controller"
 )
 
 const (

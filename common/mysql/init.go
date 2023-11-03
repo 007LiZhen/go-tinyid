@@ -7,7 +7,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
-	"gitee.com/git-lz/go-tinyid/common/config"
+	"github.com/007LiZhen/go-tinyid/common/config"
 )
 
 var DB = new(gorm.DB)

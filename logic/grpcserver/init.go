@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 
-	"gitee.com/git-lz/go-tinyid/common/xgrpc/proto"
+	"github.com/007LiZhen/go-tinyid/common/xgrpc/proto"
 )
 
 type IdSequenceServer struct {

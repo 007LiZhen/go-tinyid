@@ -6,34 +6,19 @@ import (
 	"fmt"
 	"time"
 
-	"gitee.com/git-lz/go-tinyid/dao"
-	"gitee.com/git-lz/go-tinyid/model"
+	"github.com/007LiZhen/go-tinyid/dao"
+	"github.com/007LiZhen/go-tinyid/model"
 )
 
+// IdSequence - The generator struct
 type IdSequence struct {
-	idListLength int64
-	biz          string
-	ids          chan int64
-	stopMonitor  chan bool
+	idListLength int64      // the length of id list, you can define it by your business
+	biz          string     // business type
+	ids          chan int64 // the channel of id list
+	stopMonitor  chan bool  // the stop monitor signal
 }
 
-func Stop() {
-	for _, idSequence := range IdSequenceMap {
-		idSequence.stopMonitor <- true
-		idSequence.Close()
-		idSequence.saveLastId(context.Background())
-	}
-}
-
-func GetIdSequence(biz string) (*IdSequence, error) {
-	idSequence, ok := IdSequenceMap[biz]
-	if !ok {
-		return nil, fmt.Errorf("biz=(%s) nor support", biz)
-	}
-
-	return idSequence, nil
-}
-
+// NewIdSequence - Create a new IdSequence by idListLength and biz
 func NewIdSequence(idListLength int64, biz string) *IdSequence {
 	is := &IdSequence{
 		ids:          make(chan int64, idListLength),
@@ -46,11 +31,15 @@ func NewIdSequence(idListLength int64, biz string) *IdSequence {
 	return is
 }
 
+// Close - You can use it to close the id list channel and stop monitor goroutine
 func (is *IdSequence) Close() {
 	close(is.ids)
 	close(is.stopMonitor)
 }
 
+// Monitor - This function can monitor the capacity of the id list. If the capacity of the id list is zero, it will
+//
+//	add new ids to the list.
 func (is *IdSequence) Monitor(ctx context.Context) {
 	for {
 		select {
@@ -69,8 +58,9 @@ func (is *IdSequence) Monitor(ctx context.Context) {
 	}
 }
 
+// GetOne - Get a new id from the id list channel.
 func (is *IdSequence) GetOne() (int64, error) {
-	// 如果取不到，则会等待1s
+	// if there is no new id, sleep 1s
 	ticker := time.After(time.Second)
 
 	for {
@@ -85,6 +75,7 @@ func (is *IdSequence) GetOne() (int64, error) {
 	}
 }
 
+// add - Add new ids to the id list channel
 func (is *IdSequence) add(ctx context.Context) error {
 	minId, maxId, err := is.getNewIdListLoop(ctx)
 	if err != nil {
@@ -98,6 +89,7 @@ func (is *IdSequence) add(ctx context.Context) error {
 	return nil
 }
 
+// getNewIdListLoop - Add new id to the id list channel for spin with optimistic lock.
 func (is *IdSequence) getNewIdListLoop(ctx context.Context) (int64, int64, error) {
 	ticker := time.After(10 * time.Second)
 
@@ -121,6 +113,7 @@ func (is *IdSequence) getNewIdListLoop(ctx context.Context) (int64, int64, error
 	}
 }
 
+// getNewIdListSync - Get new max id from the mysql with optimistic lock.
 func (is *IdSequence) getNewIdListSync(ctx context.Context, curMaxIdCh, newMaxIdCh chan int64, errCh chan error) {
 	idSequenceDao := dao.NewIdSequenceDao()
 
@@ -152,10 +145,14 @@ func (is *IdSequence) getNewIdListSync(ctx context.Context, curMaxIdCh, newMaxId
 
 	record := records[0]
 	newMaxId := record.Value + is.idListLength
+	version := record.Version + 1
 
-	rowsEffect, err := idSequenceDao.UpdateByCond(ctx, record.Version, map[string]interface{}{
+	rowsEffect, err := idSequenceDao.UpdateByCond(ctx, map[string]interface{}{
+		"version": record.Version,
+		"biz":     is.biz,
+	}, map[string]interface{}{
 		"value":   newMaxId,
-		"version": 0,
+		"version": version,
 	})
 	if err != nil {
 		errCh <- err
@@ -172,12 +169,14 @@ func (is *IdSequence) getNewIdListSync(ctx context.Context, curMaxIdCh, newMaxId
 	errCh <- nil
 }
 
+// saveLastId - save the last id when the process is being stopped
 func (is *IdSequence) saveLastId(ctx context.Context) {
 	lastId, ok := <-is.ids
 	if ok && lastId != 0 {
-		dao.NewIdSequenceDao().UpdateByCond(ctx, 0, map[string]interface{}{
-			"value":   lastId,
-			"version": 0,
+		dao.NewIdSequenceDao().UpdateByCond(ctx, map[string]interface{}{
+			"biz": is.biz,
+		}, map[string]interface{}{
+			"value": lastId,
 		})
 	}
 }

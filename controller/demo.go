@@ -3,10 +3,10 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 
-	"gitee.com/git-lz/go-tinyid/common/dto/demo"
-	"gitee.com/git-lz/go-tinyid/common/dto/response"
-	"gitee.com/git-lz/go-tinyid/common/merrors"
-	"gitee.com/git-lz/go-tinyid/logic/idsequence"
+	"github.com/007LiZhen/go-tinyid/common/dto/demo"
+	"github.com/007LiZhen/go-tinyid/common/dto/response"
+	"github.com/007LiZhen/go-tinyid/common/merrors"
+	"github.com/007LiZhen/go-tinyid/logic/idsequence"
 )
 
 type ID struct{}

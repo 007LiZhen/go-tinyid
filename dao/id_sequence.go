@@ -3,8 +3,8 @@ package dao
 import (
 	"context"
 
-	"gitee.com/git-lz/go-tinyid/dao/basedao"
-	"gitee.com/git-lz/go-tinyid/model"
+	"github.com/007LiZhen/go-tinyid/dao/basedao"
+	"github.com/007LiZhen/go-tinyid/model"
 )
 
 type idSequenceDao struct {
@@ -23,9 +23,14 @@ func (d *idSequenceDao) SetModel(model *model.IdSequence) *idSequenceDao {
 	return tx
 }
 
-func (d *idSequenceDao) UpdateByCond(ctx context.Context, version int, update map[string]interface{}) (int64, error) {
-	db := d.Db.WithContext(ctx).Table(d.TableName).Where("version = (?)", version).
-		Updates(update)
+func (d *idSequenceDao) UpdateByCond(ctx context.Context, cond map[string]interface{}, update map[string]interface{}) (int64, error) {
+	db := d.Db.WithContext(ctx).Table(d.TableName)
+
+	for k, v := range cond {
+		db = db.Where(k+" = ?", v)
+	}
+
+	db = db.Updates(update)
 	if db.Error != nil {
 		return 0, db.Error
 	}

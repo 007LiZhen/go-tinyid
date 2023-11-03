@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"gitee.com/git-lz/go-tinyid/common/merrors"
+	"github.com/007LiZhen/go-tinyid/common/merrors"
 )
 
 type Response struct {

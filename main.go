@@ -6,11 +6,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	"gitee.com/git-lz/go-tinyid/common/config"
-	"gitee.com/git-lz/go-tinyid/common/mysql"
-	"gitee.com/git-lz/go-tinyid/logic/grpcserver"
-	"gitee.com/git-lz/go-tinyid/logic/idsequence"
-	"gitee.com/git-lz/go-tinyid/router"
+	"github.com/007LiZhen/go-tinyid/common/config"
+	"github.com/007LiZhen/go-tinyid/common/mysql"
+	"github.com/007LiZhen/go-tinyid/logic/grpcserver"
+	"github.com/007LiZhen/go-tinyid/logic/idsequence"
+	"github.com/007LiZhen/go-tinyid/router"
 )
 
 func main() {

@@ -8,8 +8,8 @@ import (
 
 	"github.com/magiconair/properties/assert"
 
-	"gitee.com/git-lz/go-tinyid/common/config"
-	"gitee.com/git-lz/go-tinyid/common/mysql"
+	"github.com/007LiZhen/go-tinyid/common/config"
+	"github.com/007LiZhen/go-tinyid/common/mysql"
 )
 
 func init() {

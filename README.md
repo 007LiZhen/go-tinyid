@@ -1,33 +1,36 @@
 # go-tinyid
 
-#### 介绍
-本项目主要利用go语言(go1.20)实现了一种id生成器，并提供了http和grpc两种访问方式。项目中采用的生成算法主要基于数据库号段算法实现。关于这个算法可以参考
-[美团Left](https://tech.meituan.com/2017/04/21/mt-leaf.html)。
+#### Introduction
+[中文介绍](https://github.com/007LiZhen/go-tinyid/blob/master/README.md)
 
-#### 项目结构
-    main.go    - 程序入口，项目初始化，并实现了平滑停服
-    router     - 路由
-    controller - api接口
-    model      - 数据模型定义
-    dao        - 数据表操作
-    logic      - 逻辑操作
-        grpcserver - grpc服务器
-        idsequence - 实现了数据号段生成算法
-    conf        - 数据库配置信息
-    common      - 公共库
-        config  - viper配置
-        dto     - 请求响应/返回值结构体
-        merrors - 错误码、错误信息定义
-        mysql   - 数据库连接池
-        xgrpc   - grpc server的proto定义
+This project mainly utilizes the Go language (go1.20) to implement an ID generator, and provides two access methods: HTTP and GRPC.
+The generation algorithm used in the project is mainly based on the database number segment algorithm. You can refer to this algorithm for reference
+[MeiTuan Left](https://tech.meituan.com/2017/04/21/mt-leaf.html)。
 
-#### 使用说明
-1. 项目采用go1.20编写，采用go mod进行包管理
-2. 编译运行 go build && ./go-tinyid
-3. 项目提供http和grpc两种访问方式，可自行选择
+#### Project Structure
+    main.go    - Program entry, project initialization, and smooth server shutdown achieved
+    router     - HTTP routing
+    controller - api controller
+    model      - data model definition
+    dao        - database operations
+    logic      - logic operation
+        grpcserver - grpc server
+        idsequence - implemented data number segment generation algorithm
+    conf        - the configures of database
+    common      - common lib
+        config  - viper config
+        dto     - request response/return data structure
+        merrors - error number and error message
+        mysql   - the connection pool of database
+        xgrpc   - the proto defination of grpc server
 
-#### 核心流程说明
-##### 1. 定义id生成器结构体
+#### Instructions For Use
+1. The project is written using go1.20 and package management is carried out using go mod
+2. build and run: go build && ./go-tinyid
+3. The project provides two access methods: HTTP and GRPC, which can be chosen by oneself
+
+#### Core Process Description
+##### 1. Define the ID generator structure
 ```
    type IdSequence struct {
       idListLength int64           // 号段长度，可根据业务qps自行设置
@@ -37,12 +40,15 @@
    }
 ```
 
-##### 2. id生成器共有Monitor，GetOne, Close三个对外暴露的方法。
-       Monitor方法主要实现对id list的监控，当检测到id list为空时，会调用add方法，向id list中添加idListLength个新id，在添加新id过程中，
-    会使用mysql 乐观锁，以防止其他进程也在更新获取到的最新id;
-       GetOne方法主要会从id list里面获取一个新的id;
-       Close方法主要是关闭channel，停止写入新的id;
-##### 3. 数据表结构
+##### 2. The ID generator has three exposed methods: Monitor(), GetOne(), and Close().
+       The Monitor method mainly monitors the ID list. When it is detected that the ID list is empty, 
+    the add method will be called to add a new ID of idListLength to the ID list. During the process 
+    of adding a new ID, MySQL optimistic locks will be used to prevent other processes from updating 
+    the latest IDs obtained;
+       The GetOne method mainly obtains a new ID from the ID list;
+       The Close method mainly closes the channel and stops writing new IDs.
+
+##### 3. Data Table Structure
 ```
 create table if not exists test.sequence
 (
@@ -57,10 +63,10 @@ create table if not exists test.sequence
 ) charset = utf8mb4;
 ```
 
-#### 参与贡献
-欢迎大家积极提issue, 共建golang版本的tinyid
+#### Participation Contribution
+Welcome everyone to actively raise issues and jointly build the Golang version of tinyid
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+1.  Fork this project
+2.  Create Feat_xxx branch
+3.  Commit your code
+4.  Create new Pull Request
